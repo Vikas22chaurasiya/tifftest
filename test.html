@@ -1,0 +1,54 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIFF to PNG Converter</title>
+</head>
+<body>
+    <h1>TIFF to PNG Converter</h1>
+    <input type="file" id="fileInput" accept=".tiff,.tif">
+    <canvas id="canvas" style="display:none;"></canvas>
+    <br>
+    <a id="downloadLink" download="output.png" style="display:none;">Download PNG</a>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/tiff.js@1.0.0/tiff.min.js"></script> -->
+     <script src="tiff.min.js"></script>
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const tiff = new Tiff({ buffer: e.target.result });
+                        const canvas = document.getElementById('canvas');
+                        canvas.width = tiff.width();
+                        canvas.height = tiff.height();
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(tiff.toCanvas(), 0, 0);
+
+                        // Convert canvas to PNG and create a download link
+                        canvas.toBlob(function(blob) {
+                            const pngUrl = URL.createObjectURL(blob);
+                            const downloadLink = document.getElementById('downloadLink');
+                            downloadLink.href = pngUrl;
+                            downloadLink.style.display = 'inline'; // Show the download link
+
+                            // Open the PNG in a new tab
+                            window.open(pngUrl, '_blank',`width=500,height=600,left=5,top=100`);
+                        }, 'image/png');
+                    } catch (error) {
+                        console.error("Error processing TIFF file: ", error.message);
+                        alert("There was an error processing the TIFF file. Please make sure the file is valid.");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+    </script>
+</body>
+</html>
